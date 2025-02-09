@@ -31,45 +31,50 @@ class ControlPanel:
         ).pack(side=tk.LEFT, padx=5, expand=True)
         
         # Comments mode indicator with label
-        comments_frame = tk.Frame(controls_frame)
-        comments_frame.pack(side=tk.LEFT, padx=5, expand=True)
+        self.comments_frame = tk.Frame(controls_frame)
+        self.comments_frame.pack(side=tk.LEFT, padx=5, expand=True)
         
         tk.Label(
-            comments_frame,
+            self.comments_frame,
             text="Comments Mode (press 'c')",
             font=('Arial', 10)
         ).pack(side=tk.TOP)
         
-        # Create indicator label with more distinct styling
+        # Create indicator label with softer styling
         self.comments_indicator = tk.Label(
-            comments_frame,
+            self.comments_frame,
             text="OFF",
             font=('Arial', 10, 'bold'),
             fg='white',
-            bg=COLORS['toggle_inactive'],
+            bg=COLORS['toggle_inactive'],  # Use the same gray as toggle button
             width=6,
             padx=5,
             pady=2,
-            relief='raised',  # Add some 3D effect
+            relief='solid',  # Changed from 'raised' to 'solid' for a softer look
             borderwidth=1
         )
         self.comments_indicator.pack(side=tk.TOP, pady=2)
+        
+        # Store reference to control panel in the main window
+        main_window = self.parent.winfo_toplevel()
+        if hasattr(main_window, 'window'):
+            main_window.window.control_panel = self
 
     def update_comments_indicator(self, is_active):
         """Update the comments mode indicator appearance"""
         print(f"Control panel updating indicator to: {is_active}")  # Debug print
         
-        # More distinct colors
+        # Use the same colors as the toggle button
         if is_active:
             self.comments_indicator.config(
                 text="ON",
-                bg='#2ecc71',  # Bright green
+                bg=COLORS['toggle_active'],  # Use the same blue as toggle button
                 fg='white'
             )
         else:
             self.comments_indicator.config(
                 text="OFF",
-                bg='#e74c3c',  # Bright red
+                bg=COLORS['toggle_inactive'],  # Use the same gray as toggle button
                 fg='white'
             )
         

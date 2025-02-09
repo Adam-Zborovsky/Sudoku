@@ -422,11 +422,16 @@ class SudokuGrid:
         print(f"Setting comments mode to: {enabled}")  # Debug print
         self.comments_mode = enabled
         
-        # Update the control panel indicator if it exists
-        # The control panel is on the parent frame
-        if hasattr(self.parent, 'control_panel'):
-            print("Found control panel on parent")  # Debug print
-            self.parent.control_panel.update_comments_indicator(enabled)
+        # Get the main window
+        main_window = self.parent.winfo_toplevel()
+        print(f"Main window: {main_window}")  # Debug print
+        
+        # Look for control panel directly on the window instance
+        if hasattr(main_window, 'window') and hasattr(main_window.window, 'control_panel'):
+            print("Found control panel, updating indicator...")  # Debug print
+            main_window.window.control_panel.update_comments_indicator(enabled)
+        else:
+            print("Could not find control panel")  # Debug print
         
         # Update cell highlighting if needed
         if self.selected_cell:
