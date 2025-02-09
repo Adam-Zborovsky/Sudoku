@@ -5,38 +5,41 @@ import math
 from gui.widgets.toggle_button import RoundToggleButton
 from gui.widgets.sudoku_cell import SudokuCell
 
+
 class RoundToggleButton(tk.Canvas):
     def __init__(self, parent, width=60, height=30, padding=3, command=None):
-        super().__init__(parent, width=width, height=height, bg=COLORS['white'], highlightthickness=0)
+        super().__init__(parent, width=width, height=height,
+                         bg=COLORS['white'], highlightthickness=0)
         self.command = command
         self.active = False  # Start inactive
         self.width = width
         self.height = height
         self.padding = padding
-        
+
         # Animation settings
         self.animation_duration = 250  # Slightly faster animation
         self.animation_steps = 25
         self.animation_running = False
-        
+
         # Calculate dimensions
         self.rail_height = height - 2*padding
         self.rail_radius = self.rail_height // 2
         self.circle_diameter = self.rail_height - 6  # Make circle slightly smaller
-        
+
         # Create the background rail (pill shape)
         self.create_rail()
-        
+
         # Initial circle position
         circle_y = self.height//2  # Center circle vertically
         shadow_offset = 2
-        
+
         # Set initial position to the left (inactive state)
         initial_x = self.padding + 4
-        
+
         self.circle_shadow = self.create_oval(
             initial_x-shadow_offset, circle_y-self.circle_diameter//2-shadow_offset,
-            initial_x+self.circle_diameter+shadow_offset, circle_y+self.circle_diameter//2+shadow_offset,
+            initial_x+self.circle_diameter+shadow_offset, circle_y +
+            self.circle_diameter//2+shadow_offset,
             fill='#cccccc', outline='', tags='shadow'
         )
         self.circle = self.create_oval(
@@ -45,22 +48,22 @@ class RoundToggleButton(tk.Canvas):
             fill='white', outline='#e0e0e0', width=1,
             tags='circle'
         )
-        
+
         # Ensure proper stacking order
         self.tag_raise('shadow')
         self.tag_raise('circle')
-        
+
         # Set initial rail color
         self.itemconfig('rail', fill=COLORS['toggle_inactive'])
-        
+
         self.bind('<Button-1>', self.toggle)
-        
+
     def create_rail(self):
         # Create the rail background with true rounded corners using arcs
         x1, y1 = self.padding, self.padding
         x2, y2 = self.width - self.padding, self.height - self.padding
         radius = self.rail_radius
-        
+
         # Create the base shape
         self.create_rectangle(
             x1 + radius, y1,
@@ -68,7 +71,7 @@ class RoundToggleButton(tk.Canvas):
             fill=COLORS['toggle_active'], outline='',
             tags='rail'
         )
-        
+
         # Add the rounded ends
         self.create_arc(
             x1, y1,
@@ -94,48 +97,49 @@ class RoundToggleButton(tk.Canvas):
                 fraction = 4 * progress * progress * progress
             else:
                 p = progress - 1
-                fraction = 1 + 4 * p * p * p + math.sin(progress * 4) * 0.1  # Add slight bounce
-                
+                fraction = 1 + 4 * p * p * p + \
+                    math.sin(progress * 4) * 0.1  # Add slight bounce
+
             current_x = start_x + (end_x - start_x) * fraction
-            
+
             # Update circle and shadow position
             circle_y = self.height//2
             shadow_offset = 2
-            
+
             # Update shadow position
             self.coords(self.circle_shadow,
-                       current_x-shadow_offset, circle_y-self.circle_diameter//2-shadow_offset,
-                       current_x+self.circle_diameter+shadow_offset, circle_y+self.circle_diameter//2+shadow_offset)
-            
+                        current_x-shadow_offset, circle_y-self.circle_diameter//2-shadow_offset,
+                        current_x+self.circle_diameter+shadow_offset, circle_y+self.circle_diameter//2+shadow_offset)
+
             # Update circle position
             self.coords(self.circle,
-                       current_x, circle_y-self.circle_diameter//2,
-                       current_x+self.circle_diameter, circle_y+self.circle_diameter//2)
-            
+                        current_x, circle_y-self.circle_diameter//2,
+                        current_x+self.circle_diameter, circle_y+self.circle_diameter//2)
+
             # Interpolate colors with slight bounce effect
             if self.active:
                 color = COLORS['toggle_active']
             else:
                 color = COLORS['toggle_inactive']
-            
+
             # Update all rail parts
             self.itemconfig('rail', fill=color)
-            
+
             # Schedule next animation frame
-            self.after(self.animation_duration // self.animation_steps, 
-                      lambda: self.animate_toggle(start_x, end_x, step + 1))
+            self.after(self.animation_duration // self.animation_steps,
+                       lambda: self.animate_toggle(start_x, end_x, step + 1))
         else:
             self.animation_running = False
             if self.command:
                 self.command()
-        
+
     def toggle(self, event=None):
         if self.animation_running:
             return
-            
+
         self.animation_running = True
         self.active = not self.active
-        
+
         if self.active:
             # Animate right
             start_x = self.padding + 4
@@ -144,11 +148,12 @@ class RoundToggleButton(tk.Canvas):
             # Animate left
             start_x = self.width - self.padding - self.circle_diameter - 4
             end_x = self.padding + 4
-            
+
         # Update rail color immediately
-        self.itemconfig('rail', fill=COLORS['toggle_active'] if self.active else COLORS['toggle_inactive'])
+        self.itemconfig(
+            'rail', fill=COLORS['toggle_active'] if self.active else COLORS['toggle_inactive'])
         self.animate_toggle(start_x, end_x)
-        
+
         # Call the command after toggling state
         if self.command:
             self.command()
@@ -157,17 +162,19 @@ class RoundToggleButton(tk.Canvas):
         if active != self.active:
             self.active = active
             # Update the rail color immediately
-            self.itemconfig('rail', fill=COLORS['toggle_active'] if active else COLORS['toggle_inactive'])
+            self.itemconfig(
+                'rail', fill=COLORS['toggle_active'] if active else COLORS['toggle_inactive'])
             # Move circle to correct position without animation
             circle_y = self.height//2
-            x = self.width - self.padding - self.circle_diameter - 4 if active else self.padding + 4
+            x = self.width - self.padding - self.circle_diameter - \
+                4 if active else self.padding + 4
             shadow_offset = 2
             self.coords(self.circle_shadow,
-                       x-shadow_offset, circle_y-self.circle_diameter//2-shadow_offset,
-                       x+self.circle_diameter+shadow_offset, circle_y+self.circle_diameter//2+shadow_offset)
+                        x-shadow_offset, circle_y-self.circle_diameter//2-shadow_offset,
+                        x+self.circle_diameter+shadow_offset, circle_y+self.circle_diameter//2+shadow_offset)
             self.coords(self.circle,
-                       x, circle_y-self.circle_diameter//2,
-                       x+self.circle_diameter, circle_y+self.circle_diameter//2)
+                        x, circle_y-self.circle_diameter//2,
+                        x+self.circle_diameter, circle_y+self.circle_diameter//2)
 
     def create_rounded_rect(self, x1, y1, x2, y2, radius, **kwargs):
         points = [
@@ -186,16 +193,20 @@ class RoundToggleButton(tk.Canvas):
         ]
         return self.create_polygon(points, smooth=True, **kwargs)
 
+
 class SudokuCell(tk.Canvas):
     def __init__(self, parent, row, col, **kwargs):
-        super().__init__(parent, width=60, height=60, bg=COLORS['white'], highlightthickness=1, **kwargs)
+        super().__init__(parent, width=60, height=60,
+                         bg=COLORS['white'], highlightthickness=1, **kwargs)
         self.row = row
         self.col = col
         self.value = ""
         self.comments = set()  # Store comments as a set of numbers
         self.readonly = False
         self.bg_color = COLORS['white']
-        
+        self.size = 60  # Store size for matching outline drawing
+        self.matching_outline = None  # Initialize matching outline
+
         # Fixed positions for each number 1-9 in a 3x3 grid
         self.comment_positions = {
             1: (15, 15),   # Top-left
@@ -208,7 +219,7 @@ class SudokuCell(tk.Canvas):
             8: (30, 45),   # Bottom-middle
             9: (45, 45)    # Bottom-right
         }
-        
+
         # Create text items for main value and comments
         # Center the main value text
         self.value_text = self.create_text(
@@ -219,13 +230,13 @@ class SudokuCell(tk.Canvas):
             anchor='center'  # Ensure text is centered
         )
         self.comment_texts = {}  # Dictionary to store comment text items
-        
+
     def set_value(self, value):
         self.value = value
         self.itemconfig(self.value_text, text=str(value) if value else "")
         if value:  # Clear comments when setting a value
             self.clear_comments()
-            
+
     def add_comment(self, number):
         if not self.value and not self.readonly:  # Only add comments to empty, non-readonly cells
             if number in self.comments:
@@ -242,26 +253,26 @@ class SudokuCell(tk.Canvas):
                 )
                 # Raise comment text above background but below value text
                 self.tag_lower(self.comment_texts[number], self.value_text)
-            
+
     def remove_comment(self, number):
         if number in self.comments:
             self.comments.remove(number)
             if number in self.comment_texts:
                 self.delete(self.comment_texts[number])
                 del self.comment_texts[number]
-            
+
     def clear_comments(self):
         for item in self.comment_texts.values():
             self.delete(item)
         self.comment_texts.clear()
         self.comments.clear()
-            
+
     def refresh_comments(self):
         # Clear existing comment texts
         for item in self.comment_texts.values():
             self.delete(item)
         self.comment_texts.clear()
-        
+
         # Recreate all comment texts in their fixed positions
         for number in self.comments:
             x, y = self.comment_positions[number]
@@ -272,18 +283,32 @@ class SudokuCell(tk.Canvas):
                 fill='gray40',
                 anchor='center'
             )
-            
+
     def set_readonly(self, readonly):
         self.readonly = readonly
         self.bg_color = COLORS['readonly'] if readonly else COLORS['white']
         self.configure(bg=self.bg_color)
-        
+
     def set_highlight(self, color):
         self.bg_color = color
         self.configure(bg=color)
-        
+
     def get_highlight(self):
         return self.bg_color
+
+    def add_matching_outline(self, color):
+        """Draw a colored outline inside the cell boundaries for matching cells."""
+        self.remove_matching_outline()
+        # Draw an inner rectangle so the original border remains visible.
+        self.matching_outline = self.create_rectangle(
+            2, 2, self.size - 2, self.size - 2, outline=color, width=3)
+
+    def remove_matching_outline(self):
+        """Remove the matching outline if it exists."""
+        if self.matching_outline is not None:
+            self.delete(self.matching_outline)
+            self.matching_outline = None
+
 
 class SudokuGrid:
     def __init__(self, parent, game_logic):
@@ -295,10 +320,10 @@ class SudokuGrid:
         self.lives = 3  # Initialize with 3 lives
         self.parent = parent  # Store parent reference
         self.game_over_active = False  # flag to prevent multiple popups
-        
+
         # Create the grid
         self.create_grid()
-        
+
         # Create lives display
         self.lives_label = tk.Label(
             self.frame,
@@ -307,22 +332,21 @@ class SudokuGrid:
             bg=COLORS['white']
         )
         self.lives_label.grid(row=9, column=0, columnspan=9, pady=(5, 0))
-        
+
         # Bind keyboard events to the frame
         self.frame.bind('<Key>', self.on_key_press)
-        # Make the frame focusable and bind focus events
         self.frame.configure(takefocus=1)
         self.frame.bind('<FocusOut>', lambda e: self.frame.focus_set())
-        
+
         self.frame.pack(padx=10, pady=10)
-        # Set initial focus
         self.frame.focus_set()
-        
+
         # Highlight flags
         self.show_row = True
         self.show_column = True
-        self.show_box = True
-        
+        self.show_box = False  # Box highlighting off by default
+        self.show_matching = True  # Same-number highlight on by default
+
     def create_grid(self):
         # Create 9x9 grid of custom cells
         for i in range(9):
@@ -335,14 +359,17 @@ class SudokuGrid:
                     col=j
                 )
                 cell.grid(row=i, column=j, sticky='nsew',
-                         padx=(2 if j % 3 != 2 else 3),  # Slightly larger padding
-                         pady=(2 if i % 3 != 2 else 3))  # Slightly larger padding
-                
+                          # Slightly larger padding
+                          padx=(2 if j % 3 != 2 else 3),
+                          # Slightly larger padding
+                          pady=(2 if i % 3 != 2 else 3))
+
                 # Bind events
-                cell.bind('<Button-1>', lambda e, r=i, c=j: self.cell_clicked(r, c))
-                
+                cell.bind('<Button-1>', lambda e, r=i,
+                          c=j: self.cell_clicked(r, c))
+
                 self.cells[(i, j)] = cell
-                
+
         # Add thicker borders for 3x3 boxes
         for i in range(3):
             for j in range(3):
@@ -361,11 +388,11 @@ class SudokuGrid:
     def handle_keypress(self, event, row, col):
         if self.selected_cell is None:
             return "break"
-            
+
         cell = self.cells[self.selected_cell]
         if cell.readonly:
             return "break"
-            
+
         if event.char in '123456789':
             number = int(event.char)
             if self.comments_mode:
@@ -387,7 +414,7 @@ class SudokuGrid:
                     self.lives_label.config(text="❤️" * self.lives)
                     cell.set_highlight(COLORS['wrong'])
                     cell.set_value("")  # Clear the wrong value
-                    
+
                     if self.lives <= 0:
                         self.handle_game_over()
         elif event.keysym in ['BackSpace', 'Delete']:
@@ -396,20 +423,20 @@ class SudokuGrid:
                 cell.set_highlight(COLORS['white'])
             else:
                 cell.clear_comments()
-                
+
         return "break"
-        
+
     def clear_related_comments(self, row, col, number):
         # Clear comments with the same number in the same row
         for j in range(9):
             if j != col:
                 self.cells[(row, j)].remove_comment(number)
-                
+
         # Clear comments with the same number in the same column
         for i in range(9):
             if i != row:
                 self.cells[(i, col)].remove_comment(number)
-                
+
         # Clear comments with the same number in the same 3x3 box
         box_row, box_col = 3 * (row // 3), 3 * (col // 3)
         for i in range(box_row, box_row + 3):
@@ -421,23 +448,23 @@ class SudokuGrid:
         """Set the comments mode state and update visual feedback."""
         print(f"Setting comments mode to: {enabled}")  # Debug print
         self.comments_mode = enabled
-        
+
         # Get the main window
         main_window = self.parent.winfo_toplevel()
         print(f"Main window: {main_window}")  # Debug print
-        
+
         # Look for control panel directly on the window instance
         if hasattr(main_window, 'window') and hasattr(main_window.window, 'control_panel'):
             print("Found control panel, updating indicator...")  # Debug print
             main_window.window.control_panel.update_comments_indicator(enabled)
         else:
             print("Could not find control panel")  # Debug print
-        
+
         # Update cell highlighting if needed
         if self.selected_cell:
             row, col = self.selected_cell
             self.highlight_cell(row, col)
-            
+
     def fill_grid(self, puzzle):
         for i in range(9):
             for j in range(9):
@@ -452,17 +479,17 @@ class SudokuGrid:
         self.highlight_cell(row, col)
         # Ensure frame has focus when cell is clicked
         self.frame.focus_set()
-    
+
     def highlight_cell(self, row, col):
-        # First store which cells were correct (green)
+        # First, store which cells were correct (green)
         correct_cells = []
         for i in range(9):
             for j in range(9):
                 cell = self.cells[(i, j)]
                 if cell.get_highlight() == COLORS['correct']:
                     correct_cells.append((i, j))
-        
-        # Clear all highlights
+
+        # Clear all highlights and restore cell backgrounds based on readonly state.
         for i in range(9):
             for j in range(9):
                 cell = self.cells[(i, j)]
@@ -470,7 +497,7 @@ class SudokuGrid:
                     cell.set_highlight(COLORS['readonly'])
                 else:
                     cell.set_highlight(COLORS['white'])
-            
+
         # Highlight row
         if self.show_row:
             for j in range(9):
@@ -479,7 +506,7 @@ class SudokuGrid:
                     cell.set_highlight(COLORS['readonly_row'])
                 else:
                     cell.set_highlight(COLORS['row'])
-                
+
         # Highlight column
         if self.show_column:
             for i in range(9):
@@ -488,8 +515,8 @@ class SudokuGrid:
                     cell.set_highlight(COLORS['readonly_column'])
                 else:
                     cell.set_highlight(COLORS['column'])
-                
-        # Highlight 3x3 box
+
+        # Highlight 3x3 box if enabled
         if self.show_box:
             box_row, box_col = 3 * (row // 3), 3 * (col // 3)
             for i in range(box_row, box_row + 3):
@@ -499,21 +526,27 @@ class SudokuGrid:
                         cell.set_highlight(COLORS['readonly_box'])
                     else:
                         cell.set_highlight(COLORS['box'])
-        
-        # Highlight selected cell
+
+        # Highlight the selected cell
         selected_cell = self.cells[(row, col)]
         if selected_cell.readonly and (row, col) not in correct_cells:
             selected_cell.set_highlight(COLORS['readonly_selected'])
         else:
             selected_cell.set_highlight(COLORS['selected'])
-        
-        # Restore correct (green) cells that aren't in highlighted areas
+
+        # Restore correct (green) cells that aren't in highlighted groups.
+        box_row, box_col = 3 * (row // 3), 3 * (col // 3)
         for i, j in correct_cells:
-            if not ((i == row and self.show_row) or 
-                   (j == col and self.show_column) or 
-                   (box_row <= i < box_row + 3 and 
-                    box_col <= j < box_col + 3 and self.show_box)):
+            if not ((i == row and self.show_row) or
+                    (j == col and self.show_column) or
+                    (box_row <= i < box_row + 3 and box_col <= j < box_col + 3 and self.show_box)):
                 self.cells[(i, j)].set_highlight(COLORS['correct'])
+
+        # Highlight matching cells
+        if self.show_matching and selected_cell.value:
+            for (i, j), cell in self.cells.items():
+                if (i, j) != (row, col) and cell.value == selected_cell.value:
+                    cell.set_highlight(COLORS['matching'])
 
     def on_key_press(self, event):
         if event.char.lower() == 'c':
@@ -534,7 +567,7 @@ class SudokuGrid:
                     cell.clear_comments()
                 else:
                     cell.set_value("")
-                    cell.set_highlight(COLORS['white']) 
+                    cell.set_highlight(COLORS['white'])
 
     # Added clear_board method to clear all non-readonly cells
     def clear_board(self):
@@ -561,13 +594,16 @@ class SudokuGrid:
         game_over.title("Game Over")
         game_over.geometry("300x150")
         game_over.resizable(False, False)
-        game_over.protocol("WM_DELETE_WINDOW", lambda: None)  # Disable close (X) button
+        # Disable close (X) button
+        game_over.protocol("WM_DELETE_WINDOW", lambda: None)
 
         # Center the game over window relative to the main window
         main_window.update_idletasks()
         game_over.update_idletasks()
-        x = main_window.winfo_rootx() + (main_window.winfo_width() - game_over.winfo_width()) // 2
-        y = main_window.winfo_rooty() + (main_window.winfo_height() - game_over.winfo_height()) // 2
+        x = main_window.winfo_rootx() + (main_window.winfo_width() -
+                                         game_over.winfo_width()) // 2
+        y = main_window.winfo_rooty() + (main_window.winfo_height() -
+                                         game_over.winfo_height()) // 2
         game_over.geometry(f"+{x}+{y}")
 
         # Add the game over message and button
@@ -617,4 +653,4 @@ class SudokuGrid:
 
     # Note: As the codebase grows, it is a good idea to refactor and split functionality into separate files.
     # For instance, separating UI components (like the RoundToggleButton and SudokuGrid) into their own modules
-    # can improve readability and maintainability. 
+    # can improve readability and maintainability.

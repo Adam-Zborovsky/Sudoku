@@ -4,13 +4,13 @@ WINDOW_BG = "#f0f0f0"
 
 COLORS = {
     'selected': '#e0e0ff',
-    'matching': '#f0f0ff',
     'row': '#fff0e0',
     'column': '#e0fff0',
     'box': '#ffe0f0',
     'white': '#ffffff',
+    'matching': '#b3b9ff',
     'correct': '#e6ffe6',  # Light green for correct numbers
-    'wrong': '#ffe6e6',    # Light red for wrong numbers
+    'wrong': '#fdacac',    # Light red for wrong numbers
     'readonly': '#d3d3d3',  # Darker gray for readonly cells
     'readonly_row': '#e6d5c3',  # Grayed orange
     'readonly_column': '#c3e6c3',  # Grayed green
@@ -30,4 +30,4 @@ DIFFICULTY_LEVELS = {
 ANIMATION_SETTINGS = {
     'steps': 10,
     'speed': 20
-} 
+}
