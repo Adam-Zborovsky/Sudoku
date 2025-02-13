@@ -232,9 +232,9 @@ class SudokuCell(tk.Canvas):
         self.comment_texts = {}  # Dictionary to store comment text items
 
     def set_value(self, value):
-        self.value = value
+        self.value = str(value) if value else ""
         self.itemconfig(self.value_text, text=str(value) if value else "")
-        if value:  # Clear comments when setting a value
+        if value:
             self.clear_comments()
 
     def add_comment(self, number):
@@ -545,7 +545,7 @@ class SudokuGrid:
         # Highlight matching cells
         if self.show_matching and selected_cell.value:
             for (i, j), cell in self.cells.items():
-                if (i, j) != (row, col) and cell.value == selected_cell.value:
+                if (i, j) != (row, col) and str(cell.value) == str(selected_cell.value):
                     cell.set_highlight(COLORS['matching'])
 
     def on_key_press(self, event):
