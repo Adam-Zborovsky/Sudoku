@@ -37,13 +37,13 @@ Key features include:
 
    - On Unix/MacOS:
      ```bash
-     python -m venv venv
-     source venv/bin/activate
+     python -m venv .venv
+     source .venv/bin/activate
      ```
    - On Windows:
      ```bash
-     python -m venv venv
-     venv\Scripts\activate
+     python -m venv .venv
+     .venv\Scripts\activate
      ```
 
 3. **Install Dependencies**

@@ -542,11 +542,15 @@ class SudokuGrid:
                     (box_row <= i < box_row + 3 and box_col <= j < box_col + 3 and self.show_box)):
                 self.cells[(i, j)].set_highlight(COLORS['correct'])
 
-        # Highlight matching cells
+        # Highlight matching cells and cells with matching comments
         if self.show_matching and selected_cell.value:
+            value_to_match = str(selected_cell.value)
             for (i, j), cell in self.cells.items():
-                if (i, j) != (row, col) and str(cell.value) == str(selected_cell.value):
-                    cell.set_highlight(COLORS['matching'])
+                if (i, j) != (row, col):
+                    if str(cell.value) == value_to_match:
+                        cell.set_highlight(COLORS['matching'])
+                    elif int(value_to_match) in cell.comments:
+                        cell.set_highlight(COLORS['matching'])
 
     def on_key_press(self, event):
         if event.char.lower() == 'c':
